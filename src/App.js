@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { selectDerived, fetchDerived } from './slices/thunkSlice';
+import { selectDerived, fetchDerived, selectFetchingDerived, selectDerivedError } from './slices/thunkSlice';
 
 import './App.css';
 
@@ -10,6 +10,8 @@ function App() {
     dispatch(fetchDerived());
   }, [dispatch])
 
+  const fetchingDerived = useSelector(selectFetchingDerived);
+  const derivedError = useSelector(selectDerivedError);
   let derivedString;
   const derived = useSelector(selectDerived);
   if (derived) {
@@ -18,8 +20,21 @@ function App() {
 
   return (
     <div className="App">
-    <h4>Derived</h4>
-      <pre>{derivedString}</pre>
+    <div>
+      <button onClick={() => dispatch(fetchDerived())}>Fetch</button>
+      <button onClick={() => dispatch(fetchDerived({error: true}))}>Fetch w/ error</button>
+    </div>
+    <hr />
+    <div>
+      <h4>Derived</h4>
+      {fetchingDerived &&
+        <span> Fetching</span>
+      }
+      {derivedError &&
+        <span> {derivedError}</span>
+      }
+    </div>
+    <pre>{derivedString}</pre>
     </div>
   );
 }

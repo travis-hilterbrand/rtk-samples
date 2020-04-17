@@ -1,4 +1,6 @@
-import { createSlice, createSelector } from '@reduxjs/toolkit';
+import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
+
+const sliceName = 'thunk';
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -18,30 +20,50 @@ function fetchDerivedResource() {
   });
 }
 
+export const fetchDerived = createAsyncThunk(sliceName + '/fetchDerived',
+  async ({error = false} = {}, thunkAPI) => {
+    console.info('fetchDerived');
+    await sleep(250);
+    if (error) {
+      throw new Error('Unable to load');
+    }
+    else {
+      const derived = await fetchDerivedResource();
+      return derived;
+    }
+  }
+);
 export const slice = createSlice({
-  name: 'thunk',
+  name: sliceName,
   initialState: {
+    fetchingDerived: false,
+    derivedError: null,
     derived: [],
   },
   reducers: {
-    fetchDerivedSuccess(state, action) {
-      state.derived = action.payload.items;
+  },
+  extraReducers: {
+    [fetchDerived.pending]: (state, action) => {
+      state.fetchingDerived = true;
+      state.derivedError = '';
+      state.derived = [];
     },
-  }
+    [fetchDerived.rejected]: (state, action) => {
+      state.fetchingDerived = false;
+      state.derivedError = action.error.message;
+      state.derived = [];
+    },
+    [fetchDerived.fulfilled]: (state, action) => {
+      state.fetchingDerived = false;
+      state.derivedError = '';
+      state.derived = action.payload;
+    },
+  },
 });
-export const { fetchDerivedSuccess } = slice.actions;
+export const { } = slice.actions;
 
+export const selectFetchingDerived = state => state.thunk.fetchingDerived;
+export const selectDerivedError = state => state.thunk.derivedError;
 export const selectDerived = state => state.thunk.derived;
-
-export const fetchDerived = () => async dispatch => {
-  try {
-    await sleep(250);
-    const derived = await fetchDerivedResource();
-    dispatch(fetchDerivedSuccess({items: derived}));
-  }
-  catch (err) {
-    //dispatch(getIssuesFailure(err.toString()))
-  }
-}
 
 export default slice.reducer;
