@@ -70,6 +70,4 @@ export const selectDerived = createSelector(selectDerivedInternal, (derived) => 
   return ret.reverse();
 });
 
-
-
 export default slice.reducer;
