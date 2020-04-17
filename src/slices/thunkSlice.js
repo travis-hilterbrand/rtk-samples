@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { createSlice, createSelector, createAsyncThunk } from '@reduxjs/toolkit';
 
 const sliceName = 'thunk';
@@ -60,10 +61,15 @@ export const slice = createSlice({
     },
   },
 });
-export const { } = slice.actions;
 
 export const selectFetchingDerived = state => state.thunk.fetchingDerived;
 export const selectDerivedError = state => state.thunk.derivedError;
-export const selectDerived = state => state.thunk.derived;
+const selectDerivedInternal = state => state.thunk.derived;
+export const selectDerived = createSelector(selectDerivedInternal, (derived) => {
+  const ret = _.cloneDeep(derived);
+  return ret.reverse();
+});
+
+
 
 export default slice.reducer;
